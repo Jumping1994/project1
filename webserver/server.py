@@ -9,7 +9,7 @@ Go to http://localhost:8111 in your browser
 A debugger such as "pdb" may be helpful for debugging.
 Read about it online.
 """
-
+import datetime
 import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
@@ -143,15 +143,40 @@ def login():
       return redirect(url_for('showRestaurant'))
   return render_template('login.html',error=error)
 
-@app.route('/showRestaurant')
+@app.route('/showRestaurant',methods=['GET','POST'])
 def showRestaurant():
     #return render_template('restaurant.html',restaurants=restaurants)
     #cid_tmp = session.get('cid') # cid with restaurnat
     #if cid_tmp is not None and session.get('logged_in') is not None:
     cursor = g.conn.execute("SELECT * from restaurant") #check restaurant name
     restaurants = cursor.fetchall()
-    return render_template("showRestaurant.html", restaurants = restaurants)
-  #
+    cursor2=g.conn.execute("SELECT name,R.restaurant_ID,table_no,size from restaurant R, tables_owns T where R.restaurant_ID=T.restaurant_ID")
+    cursor3=g.conn.execute("SELECT table_no,restaurant_id from reserves")
+
+    name={}
+    error=None
+    if request.method=='POST':
+     restaurant_name=request.form['restaurant name']
+     size=request.form['table size']
+
+     for res2 in cursor2:
+       name[res2[0]]=0
+     if restaurant_name not in name:
+       error="This restaurant is not available"
+       return render_template("showRestaurant.html", restaurants = restaurants,error=error)
+     if error==None:
+       for res2 in cursor2:
+         if res2[0]==restaurant_name and size<res2[3]:
+           reserveation_exist=False
+           for res3 in cursor3:
+             if res3[0]==res2[2] and res3[1]==res2[1]:
+               reserveation_exist=True;
+               break;
+             if reserveation_exist==False:
+               g.conn.execute("INSERT into reserves (table_no,restaurant_id,time) VALUES (res2[2],res2[1],datetime.date.today())")
+               return render_template("showRestaurant.html", restaurants = restaurants,error=error,table_no=res2[2])
+    # error="We can't find a table available for you"	
+   # return render_template("showRestaurant.html", restaurants = restaurants,error=error)
   # Flask uses Jinja templates, which is an extension to HTML where you can
   # pass data to a template and dynamically generate HTML based on the data
   # (you can think of it as simple PHP)

@@ -20,7 +20,17 @@
             </tr>
             {% endfor %}
         </table>
-        <a href = "/reservation">Proceed with reservation</a>
+        <form action="" method="post">
+        <input type="text" placeholder="restaurant name" name="restaurant name" required/>
+        <input type="integer" placeholder="table size" name="table size" required/>
+        <button type="submit">reserve</button>
+        </form>   
+        {% if error %}
+        <p style="color: red"> <strong><em>Error:</em></strong> {{error}}
+        {% else %}
+        <p> <strong><em>Congraulations! You have make an reservation</em></strong> </p>
+        <p style="color:black"> <strong><em>The table_no is:</em></strong> {{table_no}}
+        {% endif %}  
     </body>
 </html>
 {% endblock %}
