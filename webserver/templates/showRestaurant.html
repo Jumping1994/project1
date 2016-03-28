@@ -1,0 +1,26 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<!DOCTYPE html>
+<html>
+    <body>
+        <table border=1>
+            <thead>
+                <td>Restaurant ID</td>
+                <td>Address</td>
+                <td>Name</td>
+                <td>contact Number</td>
+            </thead>
+            {% for restaurant in restaurants %}
+            <tr>
+                <td>{{restaurant["restaurant_id"]}}</td>
+                <td>{{restaurant["address"]}}</td>
+                <td>{{restaurant["name"]}}</td>
+                <td>{{restaurant["contact_no"]}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <a href = "/reservation">Proceed with reservation</a>
+    </body>
+</html>
+{% endblock %}

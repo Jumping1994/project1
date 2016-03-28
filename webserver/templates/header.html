@@ -1,0 +1,16 @@
+<div class="row top-menu">
+    <div class = "col-md-6">
+        <a href = "{{url_for('showRestaurant')}}">
+            <span class = "glyphicon glyphicon-home" aria-hidden="true">Show all Restaurant</span>
+        </a>
+    </div>
+    
+    <div class="col-md-9 text-right">
+        {%if 'username' not in session%}
+        <a href="{{url_for('login')}}">Click here to login</a>
+        {%else%}
+        <a>Logout</a>
+        {%endif%}
+    
+    </div>
+</div>

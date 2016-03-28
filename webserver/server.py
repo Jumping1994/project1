@@ -3,14 +3,9 @@
 """
 Columbia W4111 Intro to databases
 Example webserver
-
 To run locally
-
     python server.py
-
 Go to http://localhost:8111 in your browser
-
-
 A debugger such as "pdb" may be helpful for debugging.
 Read about it online.
 """
@@ -18,7 +13,7 @@ Read about it online.
 import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response
+from flask import Flask,url_for, request, render_template, g, redirect, Response
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -37,7 +32,7 @@ app = Flask(__name__, template_folder=tmpl_dir)
 #
 #     DATABASEURI = "postgresql://ewu2493:foobar@w4111db.eastus.cloudapp.azure.com/ewu2493"
 #
-DATABASEURI = "sqlite:///test.db"
+DATABASEURI = "postgresql://xj2178:LXLYRY@w4111db.eastus.cloudapp.azure.com/xj2178"
 
 
 #
@@ -61,12 +56,12 @@ engine = create_engine(DATABASEURI)
 # 
 # The setup code should be deleted once you switch to using the Part 2 postgresql database
 #
-engine.execute("""DROP TABLE IF EXISTS test;""")
-engine.execute("""CREATE TABLE IF NOT EXISTS test (
-  id serial,
-  name text
-);""")
-engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
+#engine.execute("""DROP TABLE IF EXISTS test;""")
+#engine.execute("""CREATE TABLE IF NOT EXISTS test (
+ # id serial,
+ # name text
+#);""")
+#engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
 #
 # END SQLITE SETUP CODE
 #
@@ -79,7 +74,6 @@ def before_request():
   This function is run at the beginning of every web request 
   (every time you enter an address in the web browser).
   We use it to setup a database connection that can be used throughout the request
-
   The variable g is globally accessible
   """
   try:
@@ -118,27 +112,45 @@ def teardown_request(exception):
 def index():
   """
   request is a special object that Flask provides to access web request information:
-
   request.method:   "GET" or "POST"
   request.form:     if the browser submitted a form, this contains the data in the form
   request.args:     dictionary of URL arguments e.g., {a:1, b:2} for http://localhost?a=1&b=2
-
   See its API: http://flask.pocoo.org/docs/0.10/api/#incoming-request-data
   """
 
-  # DEBUG: this is debugging code to see what request looks like
-  print request.args
+  # DEBUG: this is debugging code to see what request looks
+  return render_template('homepage.html')
 
 
   #
   # example of a database query
   #
-  cursor = g.conn.execute("SELECT name FROM test")
-  names = []
+@app.route('/login',methods=['GET','POST'])
+def login():
+  cursor = g.conn.execute("SELECT name,customer_id FROM customer")
+  name_ID={}
   for result in cursor:
-    names.append(result['name'])  # can also be accessed using result[0]
-  cursor.close()
+    name_ID[result[0]]=result[1] # can also be accessed using result[0]
+  cursor.close()  
+  error=None
+  if request.method=='POST':
+    name=request.form['name']
+    if name not in name_ID:
+      error='name does not exist';
+    elif int(request.form['ID'])!=int(name_ID[name]):
+      error='Invalid ID,please try again.'
+    else:
+      return redirect(url_for('showRestaurant'))
+  return render_template('login.html',error=error)
 
+@app.route('/showRestaurant')
+def showRestaurant():
+    #return render_template('restaurant.html',restaurants=restaurants)
+    #cid_tmp = session.get('cid') # cid with restaurnat
+    #if cid_tmp is not None and session.get('logged_in') is not None:
+    cursor = g.conn.execute("SELECT * from restaurant") #check restaurant name
+    restaurants = cursor.fetchall()
+    return render_template("showRestaurant.html", restaurants = restaurants)
   #
   # Flask uses Jinja templates, which is an extension to HTML where you can
   # pass data to a template and dynamically generate HTML based on the data
@@ -164,16 +176,11 @@ def index():
   #     {% for n in data %}
   #     <div>{{n}}</div>
   #     {% endfor %}
-  #
-  context = dict(data = names)
-
 
   #
   # render_template looks in the templates/ folder for files.
   # for example, the below file reads template/index.html
   #
-  return render_template("index.html", **context)
-
 #
 # This is an example of a different path.  You can see it at
 # 
@@ -194,13 +201,6 @@ def add():
   g.conn.execute('INSERT INTO test VALUES (NULL, ?)', name)
   return redirect('/')
 
-
-@app.route('/login')
-def login():
-    abort(401)
-    this_is_never_executed()
-
-
 if __name__ == "__main__":
   import click
 
@@ -213,18 +213,14 @@ if __name__ == "__main__":
     """
     This function handles command line parameters.
     Run the server using
-
         python server.py
-
     Show the help text using
-
         python server.py --help
-
     """
 
     HOST, PORT = host, port
     print "running on %s:%d" % (HOST, PORT)
-    app.run(host=HOST, port=PORT, debug=debug, threaded=threaded)
+    app.run(host=HOST, port=PORT, debug=true, threaded=threaded)
 
 
   run()

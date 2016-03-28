@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  	<meta charset="utf-8">
+  	<title> Restaurant Ordering System</title>
+  </head>
+  
+  <body>
+  	<h1 align ="center"> <em> Restaurant Ordering System </em> </h1>
+  	<form action="" method="post">
+  		<input type="text" placeholder="name" name="name" value="{{request.form.name}}", required/>
+  		<input type="number" placeholder="ID" name="ID" value="{{request.form.ID}}", required/>
+                <input class="btn btn-default" type="submit" value="Login">
+        </form>
+  	{% if error %}
+  	<p style="color: red"> <strong><em>Error:</em></strong> {{error}}
+  	{% endif %}
+  </body>
+</html>
