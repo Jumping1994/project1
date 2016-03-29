@@ -9,7 +9,7 @@ Go to http://localhost:8111 in your browser
 A debugger such as "pdb" may be helpful for debugging.
 Read about it online.
 """
-import random
+from random import randint
 import datetime
 import os
 from sqlalchemy import *
@@ -143,6 +143,23 @@ def login():
       session['userID']=ID
       return redirect(url_for('showRestaurant'))
   return render_template('login.html',error=error)
+@app.route('/newuser', methods=['POST','GET'])
+def newuser():
+        c_id=0
+        newuser=None
+	if request.method == 'POST':
+		customername = request.form['customer_name']
+		customerage = request.form['customer_age']
+		customercontact = request.form['contact_number']
+		customeremail = request.form['customer_email']
+                cursor=g.conn.execute("select count(*) from customer")		
+                for res in cursor:
+                    c_id=int(res[0])+1
+		tmp = (c_id,customerage,customeremail,customername,customercontact)
+		g.conn.execute("insert into customer (customer_id,age,email,name,phone_number) values(%s,%s,%s,%s,%s)",tmp)
+                newuser="created"
+		return render_template("newuser.html",Cid=c_id,newuser=newuser)
+	return render_template("newuser.html",Cid=c_id,newuser=newuser)
 
 @app.route('/showRestaurant',methods=['GET','POST'])
 def showRestaurant():
@@ -166,7 +183,6 @@ def showRestaurant():
       if restaurant_name not in name:
         error="This restaurant is not available"
         return render_template("showRestaurant.html", restaurants = restaurants,error=error)
-      error="xx"
       for res2 in c2:
         if res2[0]==restaurant_name and int(size)<res2[3]:
           reserveation_exist=False
@@ -180,7 +196,7 @@ def showRestaurant():
             session['restaurantID']=res2[1]
             g.conn.execute("INSERT into reserves (customer_id,table_no,restaurant_id,time) VALUES (%s,%s,%s,%s)",temp)
             return redirect(url_for('placeorder'))
-     # error="We can't find a table available for you"	
+      error="We can't find a table available for you at this time"	
     return render_template("showRestaurant.html", restaurants = restaurants,error=error)
 
 @app.route('/placeorder', methods=['GET', 'POST'])
@@ -207,9 +223,11 @@ def placeorder():
 			else:
 				#finals.append(dishnames[dishname])
 				price += float(dishnames[dishname]) * float(dish[dishname])
-		order_no = 11111
+                session['price']=price     
 		globalcustomerid=session.get('userID')
 		globalresid = session.get('restaurantID')
+                order_no=int(globalresid*10000)+randint(0,9)*1000+randint(0,9)*100+randint(0,9)*10+randint(0,9)
+                session['order_no']=order_no
 		tmp = (order_no,globalcustomerid,globalresid)
 		g.conn.execute("INSERT into order_places (order_no, customer_id,restaurant_id) values (%s,%s,%s)",tmp)
 		for names in dishnames:
@@ -218,7 +236,33 @@ def placeorder():
 		return redirect(url_for('payment'))
         return render_template('placeorder.html', error=error, dishes=dishes)
 
-
+@app.route('/payment', methods=['POST','GET'])
+def payment():
+	bill=[]
+	error = None
+	customerid = session.get('userID')
+	resid = session.get('restaurantID')
+	orderno = session.get('order_no')
+	price=session.get('price')
+	bill.append(customerid)
+	bill.append(resid)
+	bill.append(orderno)
+	bill.append(price)
+	#cursor = g.conn.execute("select work_id from waiter_employs where restaurant_id = %s",resid)
+	#wid = cursor.fetchall()
+        wid=10001
+	bill_no = randint(1,9)*10000+randint(0,9)*1000+randint(0,9)*100+randint(0,9)*10+randint(0,9)
+	if request.method == 'POST':
+		tip_amount = request.form['amount']
+		tmp1 = (datetime.date.today(),float(tip_amount),customerid,wid)
+		g.conn.execute("insert into tips (time,amount,customer_id,work_id) values(%s,%s,%s,%s)",tmp1)
+		tmp2 = (customerid,resid,float(tip_amount),bill_no)
+		g.conn.execute("insert into pays (customer_id,restaurant_id,amount,bill_no) values (%s,%s,%s,%s)",tmp2)
+                return redirect(url_for('thankyou'))
+	return render_template("payment.html", bill = bill,error=error)
+@app.route('/thankyou')
+def thankyou():
+    return render_template("thankyou.html")
   # Flask uses Jinja templates, which is an extension to HTML where you can
   # pass data to a template and dynamically generate HTML based on the data
   # (you can think of it as simple PHP)
@@ -257,18 +301,8 @@ def placeorder():
 # notice that the functio name is another() rather than index()
 # the functions for each app.route needs to have different names
 #
-@app.route('/another')
-def another():
-  return render_template("anotherfile.html")
-
 
 # Example of adding new data to the database
-@app.route('/add', methods=['POST'])
-def add():
-  name = request.form['name']
-  g.conn.execute('INSERT INTO test VALUES (NULL, ?)', name)
-  return redirect('/')
-
 if __name__ == "__main__":
   import click
 

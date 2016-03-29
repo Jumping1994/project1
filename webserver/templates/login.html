@@ -12,6 +12,8 @@
   		<input type="number" placeholder="ID" name="ID" value="{{request.form.ID}}", required/>
                 <input class="btn btn-default" type="submit" value="Login">
         </form>
+        <br>
+        <p><a href="/newuser">New User</a></p>
   	{% if error %}
   	<p style="color: red"> <strong><em>Error:</em></strong> {{error}}
   	{% endif %}

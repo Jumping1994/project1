@@ -1,6 +1,6 @@
 {% extends "main.html" %}
 {% block content %}
-{% include "header.html" %}
+{% include "header1.html" %}
 <!DOCTYPE html>
 <html>
     <body>
@@ -41,9 +41,6 @@
         </form>   
         {% if error %}
         <p style="color: red"> <strong><em>Error:</em></strong> {{error}}
-        {% else %}
-        <p> <strong><em>Your order is placed</em></strong> </p>
-        <p style="color:black"> <strong><em>The order number is:</em></strong> {{order_no}}
         {% endif %}  
     </body>
 </html>

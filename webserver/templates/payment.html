@@ -1,0 +1,43 @@
+{% extends "main.html" %}
+{% block content %}
+<!DOCTYPE html>
+<html>
+    <body>
+    <h1 align ="center"> <em> Restaurant Ordering System </em> </h1>
+    <h3 align ="center"> <em> Final Bill </em> </h3>
+        <table border=1>
+            <thead>
+                <td>Customer ID</td>
+                <td>Restautant ID</td>
+                <td>Order Number</td>
+                <td>Bill</td>
+            </thead>
+            {% if bill %}
+            <tr>
+                <td>{{bill[0]}}</td>
+                <td>{{bill[1]}}</td>
+                <td>{{bill[2]}}</td>
+                <td>{{bill[3]}}</td>
+            </tr>
+            {% endif %}
+        </table>
+        <h3 align ="center"> <em> Would you like to tip for the Waiter </em> </h3>
+        <form action="" method="post">
+        <table>
+            <thead>
+                <td>Amount</td>
+            </thead>
+        <tr>
+            <td><input type="integer" placeholder="Amount" name="amount" required/></td>
+        </tr>
+        </table>
+        <button type="submit">Done</button>
+        </form>   
+        {% if error %}
+        <p style="color: red"> <strong><em>Error:</em></strong> {{error}}
+        {% else %}
+        <p style="color:black"> <strong><em>Thank You !!</em></strong>
+        {% endif %}  
+    </body>
+</html>
+{% endblock %}
