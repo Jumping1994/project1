@@ -1,0 +1,50 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<!DOCTYPE html>
+<html>
+    <body>
+        <table border=1>
+            <thead>
+                <td>Name</td>
+                <td>Description</td>
+                <td>Price</td>
+            </thead>
+            {% for dish in dishes %}
+            <tr>
+                <td>{{dish["name"]}}</td>
+                <td>{{dish["description"]}}</td>
+                <td>{{dish["prices"]}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <form action="" method="post">
+        <table>
+            <thead>
+                <td>Dish Name</td>
+                <td>Quantity</td>
+            </thead>
+        <tr>
+            <td><input type="text" placeholder="Dish Name" name="dish_name1" required/></td>
+            <td><input type="integer" placeholder="Quantity" name="quantity1" required/></td>
+        </tr>
+        <tr>
+            <td><input type="text" placeholder="Dish Name" name="dish_name2"/></td>
+            <td><input type="integer" placeholder="Quantity" name="quantity2"/></td>
+        </tr>
+        <tr>
+            <td><input type="text" placeholder="Dish Name" name="dish_name3" /></td>
+            <td><input type="integer" placeholder="Quantity" name="quantity3" /></td>
+        </tr>
+        </table>
+        <button type="submit">Order</button>
+        </form>   
+        {% if error %}
+        <p style="color: red"> <strong><em>Error:</em></strong> {{error}}
+        {% else %}
+        <p> <strong><em>Your order is placed</em></strong> </p>
+        <p style="color:black"> <strong><em>The order number is:</em></strong> {{order_no}}
+        {% endif %}  
+    </body>
+</html>
+{% endblock %}
